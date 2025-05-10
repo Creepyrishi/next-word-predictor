@@ -32,3 +32,5 @@ Output is repetitive and incoherent.
 - Not doing this ```torch.argmax(y, dim=1)```
 I have not yet gone deep why can we work with one hot encodded problem directly
 
+#### 2
+Not yet completed
