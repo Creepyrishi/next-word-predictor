@@ -33,4 +33,10 @@ Output is repetitive and incoherent.
 I have not yet gone deep why can we work with one hot encodded problem directly
 
 #### 2
-Not yet completed
+I want not able to train this model at first.
+
+The problem was I was using left padding which was converting [1,2] --> [1, 2, 0, 0] (each numnber represent a word)
+In every prediction the model was getting confused becasues after 0 there always came a new word something random.
+but soon after changing into right padding [1, 2] --> [0, 0, 1, 2] then finally model was able to learn.
+
+<img src='./v2/error_graph.png'>
