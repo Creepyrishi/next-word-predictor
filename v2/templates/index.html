@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Next Word Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #f8f9fa; 
+            font-family: 'Poppins', sans-serif;
+        }
+        .container { max-width: 600px; margin-top: 60px; }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        #inputText {
+            font-family: 'Poppins', sans-serif;
+            flex: 1;
+            background: transparent;
+            position: relative;
+            z-index: 2;
+        }
+        .prediction-text {
+            position: absolute;
+            left: 0;
+            top: 0;
+            padding: 0.375rem 0.75rem;
+            color: #6c757d;
+            font-family: 'Poppins', sans-serif;
+            pointer-events: none;
+            white-space: pre;
+            z-index: 1;
+        }
+        .form-label, .form-select {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div class="container shadow p-4 bg-white rounded">
+    <h2 class="mb-4 text-center">Next Word Predictor</h2>
+    <form id="predict-form" autocomplete="off">
+        <div class="mb-3">
+            <label for="modelSelect" class="form-label">Select Model</label>
+            <select class="form-select" id="modelSelect">
+                <option value="LSTM">LSTM</option>
+                <option value="BiLSTM">BiLSTM</option>
+                <option value="BiGRU">BiGRU</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="inputText" class="form-label">Type your text</label>
+            <div class="input-wrapper">
+                <input type="text" class="form-control" id="inputText" placeholder="Start typing...">
+                <div class="prediction-text" id="predictedText"></div>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+const inputText = document.getElementById('inputText');
+const modelSelect = document.getElementById('modelSelect');
+const predictedText = document.getElementById('predictedText');
+
+function updatePredictionPosition() {
+    const inputRect = inputText.getBoundingClientRect();
+    const inputStyle = window.getComputedStyle(inputText);
+    const paddingLeft = parseFloat(inputStyle.paddingLeft);
+    const textWidth = getTextWidth(inputText.value, inputStyle.font);
+    
+    predictedText.style.left = `${paddingLeft + textWidth}px`;
+}
+
+function getTextWidth(text, font) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context.font = font;
+    return context.measureText(text).width;
+}
+
+function fetchPrediction() {
+    const text = inputText.value.trim();
+    const model = modelSelect.value;
+    if (!text) {
+        predictedText.textContent = '';
+        return;
+    }
+    fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, model })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.next_words) {
+            predictedText.textContent = data.next_words.join(' ');
+            updatePredictionPosition();
+        } else {
+            predictedText.textContent = '';
+        }
+    });
+}
+
+inputText.addEventListener('input', () => {
+    fetchPrediction();
+    updatePredictionPosition();
+});
+modelSelect.addEventListener('change', fetchPrediction);
+
+// Handle tab key to accept prediction
+inputText.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab' && predictedText.textContent) {
+        e.preventDefault();
+        inputText.value = (inputText.value + ' ' + predictedText.textContent).trim();
+        predictedText.textContent = '';
+        fetchPrediction();
+    }
+});
+</script>
+</body>
+</html> 
