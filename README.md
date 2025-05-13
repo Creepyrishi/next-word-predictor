@@ -40,3 +40,15 @@ In every prediction the model was getting confused becasues after 0 there always
 but soon after changing into right padding [1, 2] --> [0, 0, 1, 2] then finally model was able to learn.
 
 <img src='./v2/error_graph.png'>
+
+| Models    | Losses |
+| -------- | ------- |
+| LSTM | Loss: 2.9354 |
+| BiLSTM | Loss: 2.6607 |
+| BiGRU |Loss: 3.2744 |
+
+---
+## Inference
+1. Download the project
+2. Open inference folder in terminal
+3. Run ```python app.py```
